@@ -2,6 +2,7 @@
 
 import tempfile
 import os
+import sys
 
 import numpy as np
 
@@ -51,9 +52,19 @@ class Session:
                 self.camera = Camera()
                 self.camera.open()
                 self.landmark_extractor = LandmarkExtractor()
-            except (RuntimeError, AttributeError, ImportError, OSError):
+            except (RuntimeError, AttributeError, ImportError, OSError) as e:
                 self.use_camera = False
                 self.camera = None
+                print(
+                    f"\n[Warning] Visual scoring disabled: {e}\n"
+                    "[Warning] Possible causes:\n"
+                    "  - Camera permission not granted "
+                    "(System Settings → Privacy & Security → Camera)\n"
+                    "  - MediaPipe model download failed (SSL issue) — "
+                    "check ~/.cache/pronun/face_landmarker.task exists\n"
+                    "[Warning] Falling back to audio-only scoring (Visual: N/A)\n",
+                    file=sys.stderr,
+                )
 
     def teardown(self):
         """Release resources."""
